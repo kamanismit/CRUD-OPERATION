@@ -1,24 +1,24 @@
 <?php
 require 'db_config.php';
 
-$page      = isset($_GET['page']) ? (int)$_GET['page'] : 1;
-$limit     = 5;
-$offset    = ($page - 1) * $limit;
+$perPage = 5;
+$page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+$offset = ($page - 1) * $perPage;
 
-$totalRes  = $mysqli->query("SELECT COUNT(*) as cnt FROM students")->fetch_assoc();
-$total     = $totalRes['cnt'];
-$pages     = ceil($total / $limit);
+// Get total count
+$res = $mysqli->query("SELECT COUNT(*) AS cnt FROM students");
+$total = $res->fetch_assoc()['cnt'];
+$pages = ceil($total / $perPage);
 
-$result    = $mysqli->query("SELECT * FROM students ORDER BY id DESC LIMIT $offset, $limit");
+// Get records
+$stmt = $mysqli->prepare("SELECT * FROM students ORDER BY id DESC LIMIT ? OFFSET ?");
+$stmt->bind_param("ii", $perPage, $offset);
+$stmt->execute();
+$result = $stmt->get_result();
 
-$data = [];
+$students = [];
 while ($row = $result->fetch_assoc()) {
-    $data[] = $row;
+    $students[] = $row;
 }
 
-echo json_encode([
-    "students" => $data,
-    "total"    => $total,
-    "pages"    => $pages,
-    "page"     => $page
-]);
+echo json_encode(["students" => $students, "pages" => $pages]);

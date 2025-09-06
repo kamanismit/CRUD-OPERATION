@@ -38,7 +38,7 @@ $(function () {
     }
     load();
 
-    // handle pagination click
+    // pagination click
     $(document).on("click", "#pagination a", function (e) {
         e.preventDefault();
         load(parseInt($(this).text()));
@@ -47,14 +47,16 @@ $(function () {
     // create
     $("#form-create").submit(function (e) {
         e.preventDefault();
+        if (!this.checkValidity()) return;
         $.post("api/create.php", $(this).serialize(), function () {
             toastr.success("Student added");
             $("#create-item").modal("hide");
             load(currentPage);
+            $("#form-create")[0].reset();
         });
     });
 
-    // edit (fill modal)
+    // edit fill
     $(document).on("click", ".btn-edit", function () {
         const btn = $(this);
         const modal = $("#edit-item");
@@ -70,6 +72,7 @@ $(function () {
     // update
     $("#form-edit").submit(function (e) {
         e.preventDefault();
+        if (!this.checkValidity()) return;
         $.post("api/update.php", $(this).serialize(), function () {
             toastr.success("Student updated");
             $("#edit-item").modal("hide");
@@ -87,10 +90,7 @@ $(function () {
     });
 });
 
-
-// ========================
-// Client-side filtering
-// ========================
+// client-side filter
 function applyFilters() {
     const name    = $("#filter-name").val().toLowerCase();
     const enroll  = $("#filter-enroll").val().toLowerCase();
@@ -120,6 +120,4 @@ function applyFilters() {
     });
 }
 
-// Apply filters on keyup
 $("#filter-name, #filter-enroll, #filter-course, #filter-city, #filter-state").on("keyup", applyFilters);
-
